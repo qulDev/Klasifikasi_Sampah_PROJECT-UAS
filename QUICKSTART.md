@@ -30,16 +30,34 @@ python test_detection.py --weights ./models/best.pt --image ./datasets/processed
 python test_detection.py --weights ./models/best.pt --image ./datasets/processed/val/images/cardboard57.jpg --save cardboard57_detected.jpg
 ```
 
-### 🎥 Real-time Webcam Detection
+### 🎥 Real-time Webcam Detection (NEW!)
+
+**Super Simple - Test with Your Real Waste Samples!**
 
 ```bash
 # Activate venv first
 source .venv/bin/activate
 
-# Run webcam detection (requires display)
-python detect_webcam.py --weights ./models/best.pt --source 0 --conf 0.25
+# Run real-time detection - ONE COMMAND!
+python realtime_detect.py
 
-# Press 'q' to quit
+# That's it! Camera opens automatically
+# Hold your waste in front of camera
+# Press 'Q' to quit, 'S' to save frame
+```
+
+**Features:**
+- ⚡ Auto-detects CUDA/GPU for faster performance
+- 🎨 Color-coded detection (Yellow=Plastic, Blue=Metal, Green=Glass, etc.)
+- 📊 Live FPS counter
+- 💾 Save frames with 'S' key
+- 🎮 Toggle confidence with 'C' key
+
+**See REALTIME_GUIDE.md for full instructions!**
+
+**Advanced Options (more control):**
+```bash
+python detect_webcam.py --weights ./models/best.pt --source 0 --conf 0.25
 ```
 
 ### 📹 Video File Detection
