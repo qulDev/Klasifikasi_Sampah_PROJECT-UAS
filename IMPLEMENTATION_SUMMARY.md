@@ -110,8 +110,16 @@ python train.py --model yolov8n --epochs 1 --dry-run
 # 6. Train model (full)
 python train.py --model yolov8s --epochs 100 --imgsz 640 --batch 16 --device auto
 
-# 7. Detect on image
-python detect_webcam.py --weights ./models/best.pt --source ./datasets/processed/val/images/sample.jpg
+# 7. Test detection on validation images
+# Option A: Simple test (no display needed)
+python test_detection.py --weights ./models/best.pt --image ./datasets/processed/val/images/cardboard5.jpg --save output.jpg
+
+# Option B: Full detection script (for webcam/video)
+python detect_webcam.py --weights ./models/best.pt --source ./datasets/processed/val/images/cardboard5.jpg
+
+# IMPORTANT: Activate virtual environment first!
+source .venv/bin/activate
+# Or use .venv/bin/python directly without activation
 ```
 
 ---

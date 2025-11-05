@@ -35,13 +35,13 @@ echo "✓ Virtual environment activated"
 # Upgrade pip
 echo ""
 echo "[4/5] Upgrading pip..."
-pip install --upgrade pip --quiet
+pip install --upgrade pip
 echo "✓ pip upgraded"
 
 # Install dependencies
 echo ""
 echo "[5/5] Installing dependencies..."
-pip install -r requirements.txt --quiet
+pip install -r requirements.txt
 echo "✓ Dependencies installed"
 
 # Create directory structure
