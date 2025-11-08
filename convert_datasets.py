@@ -463,36 +463,31 @@ def convert_dataset_csv(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert multiple dataset formats to YOLO format",
+        description="Convert datasets to YOLO format (auto-detect format)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Dry run to see what would be converted
-  python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all --dry-run
+Simple usage:
+  python convert_datasets.py
 
-  # Convert all datasets
+Advanced:
   python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all
-
-  # Convert with custom class list
-  python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all --classes plastic metal glass
-
-  # Use manual mapping file
-  python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all --mapping-file custom_map.json
+  python convert_datasets.py --dry-run  # Preview only
         """
     )
 
-    parser.add_argument('--src', type=Path, required=True,
-                        help='Source directory containing raw datasets')
-    parser.add_argument('--dst', type=Path, required=True,
-                        help='Destination directory for converted YOLO dataset')
+    # Simplified arguments with smart defaults
+    parser.add_argument('--src', type=Path, default=Path('./datasets/raw'),
+                        help='Source directory (default: ./datasets/raw)')
+    parser.add_argument('--dst', type=Path, default=Path('./datasets/processed/all'),
+                        help='Destination directory (default: ./datasets/processed/all)')
     parser.add_argument('--classes', nargs='*', default=TARGET_CLASSES,
-                        help=f'Target class names (default: {TARGET_CLASSES})')
+                        help=f'Target classes (default: {TARGET_CLASSES})')
     parser.add_argument('--dry-run', action='store_true',
-                        help='Only report what would be done, without converting')
+                        help='Preview only, no conversion')
     parser.add_argument('--mapping-file', type=Path, default=Path('./datasets/label_map.json'),
-                        help='Path to save label mapping JSON (default: ./datasets/label_map.json)')
+                        help='Label mapping file (default: ./datasets/label_map.json)')
     parser.add_argument('--verbose', action='store_true',
-                        help='Enable verbose logging (DEBUG level)')
+                        help='Verbose output')
 
     args = parser.parse_args()
 
