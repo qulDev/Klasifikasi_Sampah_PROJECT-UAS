@@ -243,37 +243,33 @@ def generate_data_yaml(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Split dataset into train/val/test with stratification and deduplication",
+        description="Split dataset into train/val/test with deduplication",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Standard 80/10/10 split
-  python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.8 0.1 0.1
+Simple usage:
+  python split_and_prep.py
 
-  # Custom split with seed
-  python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.7 0.15 0.15 --seed 123
-
-  # Generate data.yaml
-  python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.8 0.1 0.1 --data-yaml ./data.yaml
+Advanced:
+  python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed
+  python split_and_prep.py --split 0.7 0.15 0.15  # Custom ratio
         """
     )
 
-    parser.add_argument('--src', type=Path, required=True,
-                        help='Source directory containing merged YOLO dataset (images/ and labels/)')
-    parser.add_argument('--out', type=Path, required=True,
-                        help='Output directory for train/val/test splits')
+    # Simplified with smart defaults
+    parser.add_argument('--src', type=Path, default=Path('./datasets/processed/all'),
+                        help='Source directory (default: ./datasets/processed/all)')
+    parser.add_argument('--out', type=Path, default=Path('./datasets/processed'),
+                        help='Output directory (default: ./datasets/processed)')
     parser.add_argument('--split', nargs=3, type=float, default=[0.8, 0.1, 0.1],
                         metavar=('TRAIN', 'VAL', 'TEST'),
-                        help='Split ratios (must sum to 1.0). Default: 0.8 0.1 0.1')
+                        help='Split ratios (default: 0.8 0.1 0.1)')
     parser.add_argument('--seed', type=int, default=42,
-                        help='Random seed for reproducibility (default: 42)')
-    parser.add_argument('--no-stratify', action='store_true',
-                        help='Disable stratified sampling (not recommended)')
+                        help='Random seed (default: 42)')
     parser.add_argument('--data-yaml', type=Path, default=None,
-                        help='Path to generate data.yaml file (default: <out>/data.yaml)')
+                        help='data.yaml path (default: auto)')
     parser.add_argument('--classes', nargs='*', 
                         default=['plastic', 'metal', 'glass', 'paper', 'cardboard', 'other'],
-                        help='Class names in order of class IDs')
+                        help='Class names')
 
     args = parser.parse_args()
 
@@ -310,12 +306,7 @@ Examples:
         logger.error("No valid images found after deduplication!")
         return 1
 
-    # Perform split
-    if args.no_stratify:
-        logger.warning("Stratification disabled - class distribution may be imbalanced")
-        # Simple random split (not implemented - keeping it simple)
-        raise NotImplementedError("Non-stratified split not yet implemented. Remove --no-stratify flag.")
-
+    # Perform stratified split
     train_images, val_images, test_images = stratified_split(
         unique_images,
         src_labels_dir,
