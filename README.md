@@ -51,16 +51,44 @@ Deteksi dan klasifikasi sampah anorganik menggunakan deep learning dengan YOLOv8
 
 ## 🚀 Quick Start
 
-### 1. Convert Datasets
+### Simple Usage (Recommended)
+
+```bash
+# 1. Setup
+bash setup.sh && source .venv/bin/activate
+
+# 2. Convert datasets (auto-detect format)
+python convert_datasets.py
+
+# 3. Split train/val/test
+python split_and_prep.py
+
+# 4. Train model
+python train.py
+
+# 5. Detect objects (webcam)
+python detect.py
+```
+
+**That's it!** All commands use smart defaults. See [QUICKSTART_REFACTORED.md](QUICKSTART_REFACTORED.md) for details.
+
+---
+
+### Advanced Usage
+
+#### 1. Convert Datasets
 
 Convert raw datasets to YOLO format:
 
 ```bash
-# Dry run to see what would be converted
-python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all --dry-run
+# Use defaults (src=./datasets/raw, dst=./datasets/processed/all)
+python convert_datasets.py
 
-# Convert all datasets
-python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all
+# Custom paths
+python convert_datasets.py --src ./my_data --dst ./output
+
+# Preview only (dry-run)
+python convert_datasets.py --dry-run
 ```
 
 **Supported formats**:
@@ -70,12 +98,19 @@ python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all
 - Class folders (folder-per-class structure)
 - CSV annotations (custom bbox format)
 
-### 2. Split Dataset
+#### 2. Split Dataset
 
 Create train/val/test splits with stratification:
 
 ```bash
-python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.8 0.1 0.1
+# Use defaults (80/10/10 split)
+python split_and_prep.py
+
+# Custom split ratio
+python split_and_prep.py --split 0.7 0.15 0.15
+
+# Custom paths
+python split_and_prep.py --src ./data --out ./splits
 ```
 
 This generates:
@@ -84,19 +119,19 @@ This generates:
 - `datasets/processed/test/` - Test set (10%)
 - `data.yaml` - YOLO configuration file
 
-### 3. Train Model
+#### 3. Train Model
 
 Train YOLOv8 object detection model:
 
 ```bash
-# Quick smoke test (1 epoch)
+# Basic training (uses defaults)
+python train.py
+
+# Quick test (1 epoch)
 python train.py --model yolov8n --epochs 1 --dry-run
 
-# Train small model
-python train.py --model yolov8s --epochs 100 --imgsz 640 --batch 16 --device 0
-
-# Train medium model with early stopping
-python train.py --model yolov8m --epochs 300 --patience 50
+# Train medium model
+python train.py --model yolov8m --epochs 100 --batch 16
 ```
 
 **Model variants**:
@@ -108,11 +143,61 @@ python train.py --model yolov8m --epochs 300 --patience 50
 
 ### 4. Run Inference
 
-#### Webcam Detection
-
-Real-time detection on webcam:
+#### Real-time Webcam Detection (Simplified)
 
 ```bash
+python detect.py
+```
+
+**Controls**: `Q`=Quit | `S`=Save frame | `C`=Toggle confidence
+
+**Configuration** (edit top of `detect.py`):
+```python
+MODEL = './models/best.pt'  # Model path
+CONF = 0.25                 # Confidence threshold
+CAM = 0                     # Camera ID (0=default, 1=external)
+```
+
+#### Interactive Notebook
+
+Jupyter notebook for image upload and detection:
+
+```bash
+jupyter notebook notebooks/scan_image.ipynb
+```
+
+**Usage**: Run Cell 1 (load model) → Cell 2 (upload & detect) → Results appear automatically
+
+---
+
+## 📋 Refactored Features
+
+### ✨ What's New
+
+**1. Simplified Commands**
+- All scripts now use smart defaults
+- No required arguments for basic usage
+- Example: `python convert_datasets.py` (was: `python convert_datasets.py --src X --dst Y`)
+
+**2. Reduced Complexity**
+- `detect.py`: **130 lines** (was 358 in `realtime_detect.py`)
+- `scan_image.ipynb`: **4 cells** (was 10 cells)
+- Same features, cleaner code
+
+**3. Better Defaults**
+| Script | Old Command | New Command |
+|--------|------------|-------------|
+| Convert | `python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all` | `python convert_datasets.py` |
+| Split | `python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.8 0.1 0.1` | `python split_and_prep.py` |
+| Detect | `python realtime_detect.py` (358 lines) | `python detect.py` (130 lines) |
+
+**4. Streamlined Notebook**
+- **Cell 1**: Load model + dependencies
+- **Cell 2**: Upload widget + auto-detection
+- **Cell 3**: Help documentation
+- ~~Cell 4-10~~: Merged into Cell 2
+
+See [QUICKSTART_REFACTORED.md](QUICKSTART_REFACTORED.md) for complete refactoring details.
 python detect_webcam.py --weights ./models/best.pt --source 0
 ```
 
