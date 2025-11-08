@@ -52,54 +52,58 @@ def get_device(device_arg: str = 'auto') -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Train YOLOv8 object detection model for waste classification",
+        description="Train YOLOv8 for waste classification - Simple & Smart Defaults",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Quick smoke test (1 epoch)
-  python train.py --model yolov8n --epochs 1 --dry-run
+Simple Usage:
+  python train.py                    # Train with all defaults (recommended!)
+  
+Advanced Usage:
+  python train.py --epochs 50        # Quick training
+  python train.py --model yolov8m    # Bigger model (more accurate, slower)
+  python train.py --dry-run          # Test run (1 epoch)
 
-  # Train small model on GPU
-  python train.py --model yolov8s --epochs 100 --imgsz 640 --batch 16 --device 0
-
-  # Train medium model with early stopping
-  python train.py --model yolov8m --epochs 300 --patience 50
-
-  # Resume from checkpoint
-  python train.py --model yolov8s --resume
-
-  # Train on CPU
-  python train.py --model yolov8n --epochs 50 --device cpu
+Model Sizes (accuracy vs speed):
+  yolov8n: Fastest, least accurate (3.2M params)
+  yolov8s: Balanced - RECOMMENDED (11.2M params)  
+  yolov8m: More accurate (25.9M params)
+  yolov8l: High accuracy (43.7M params)
+  yolov8x: Best accuracy, slowest (68.2M params)
+  
+Training Parameters Explained:
+  --epochs:  How many times to see all images (default: 100)
+             More = better learning (but slower)
+             
+  --batch:   How many images to process at once (default: 16)
+             Larger = faster training (needs more GPU memory)
+             If "CUDA out of memory", use --batch 8 or --batch 4
+             
+  --imgsz:   Image size for training (default: 640)
+             Larger = more detail (but slower)
+             Must be multiple of 32 (e.g., 320, 416, 640, 800)
         """
     )
 
+    # Simple arguments with smart defaults
     parser.add_argument('--model', type=str, default='yolov8s',
                         choices=['yolov8n', 'yolov8s', 'yolov8m', 'yolov8l', 'yolov8x'],
-                        help='YOLOv8 model variant (default: yolov8s)')
+                        help='Model size (default: yolov8s - balanced)')
     parser.add_argument('--data', type=str, default='./data.yaml',
-                        help='Path to data.yaml configuration file (default: ./data.yaml)')
+                        help='Data config file (default: ./data.yaml)')
     parser.add_argument('--epochs', type=int, default=100,
-                        help='Number of training epochs (default: 100)')
-    parser.add_argument('--imgsz', type=int, default=640,
-                        help='Input image size (must be multiple of 32, default: 640)')
+                        help='Training epochs (default: 100)')
     parser.add_argument('--batch', type=int, default=16,
-                        help='Batch size (default: 16, auto-adjusted for GPU memory)')
+                        help='Batch size (default: 16)')
+    parser.add_argument('--imgsz', type=int, default=640,
+                        help='Image size (default: 640)')
     parser.add_argument('--device', type=str, default='auto',
-                        help='Device to use: auto, cpu, cuda, 0, 1, etc. (default: auto)')
-    parser.add_argument('--project', type=str, default='./runs/detect',
-                        help='Project directory to save results (default: ./runs/detect)')
-    parser.add_argument('--name', type=str, default='train',
-                        help='Experiment name (default: train)')
-    parser.add_argument('--pretrained', action='store_true', default=True,
-                        help='Use pretrained COCO weights (default: True)')
-    parser.add_argument('--no-pretrained', dest='pretrained', action='store_false',
-                        help='Train from scratch without pretrained weights')
+                        help='Device: auto/cpu/cuda (default: auto)')
     parser.add_argument('--patience', type=int, default=50,
-                        help='Early stopping patience (epochs without improvement, default: 50)')
+                        help='Early stopping patience (default: 50)')
     parser.add_argument('--resume', action='store_true',
-                        help='Resume training from last checkpoint')
+                        help='Resume from checkpoint')
     parser.add_argument('--dry-run', action='store_true',
-                        help='Run 1 epoch smoke test and exit')
+                        help='Test run (1 epoch only)')
 
     args = parser.parse_args()
 
@@ -133,17 +137,23 @@ Examples:
     # Initialize model
     logger.info(f"Initializing model: {args.model}")
     
+    # Default values for removed args
+    project = './runs/detect'
+    name = 'train'
+    pretrained = True
+    
+    
     if args.resume:
         # Try to find last checkpoint
-        last_checkpoint = Path(args.project) / args.name / 'weights' / 'last.pt'
+        last_checkpoint = Path(project) / name / 'weights' / 'last.pt'
         if last_checkpoint.exists():
             logger.info(f"Resuming from checkpoint: {last_checkpoint}")
             model = YOLO(str(last_checkpoint))
         else:
             logger.warning(f"No checkpoint found at {last_checkpoint}, starting from pretrained")
-            model = YOLO(f'{args.model}.pt' if args.pretrained else f'{args.model}.yaml')
+            model = YOLO(f'{args.model}.pt' if pretrained else f'{args.model}.yaml')
     else:
-        if args.pretrained:
+        if pretrained:
             model = YOLO(f'{args.model}.pt')  # Load pretrained COCO weights
             logger.info(f"Loaded pretrained {args.model} weights")
         else:
@@ -159,9 +169,9 @@ Examples:
     logger.info(f"  Image size:  {args.imgsz}")
     logger.info(f"  Batch size:  {args.batch}")
     logger.info(f"  Device:      {device}")
-    logger.info(f"  Project:     {args.project}")
-    logger.info(f"  Name:        {args.name}")
-    logger.info(f"  Pretrained:  {args.pretrained}")
+    logger.info(f"  Project:     {project}")
+    logger.info(f"  Name:        {name}")
+    logger.info(f"  Pretrained:  {pretrained}")
     logger.info(f"  Patience:    {args.patience}")
     logger.info("")
 
@@ -170,19 +180,19 @@ Examples:
         logger.info("Starting training...")
         logger.info("=" * 70)
 
-        results = model.train(
+        model.train(
             data=str(data_yaml),
             epochs=args.epochs,
             imgsz=args.imgsz,
             batch=args.batch,
             device=device,
-            project=args.project,
-            name=args.name,
+            project=project,
+            name=name,
             patience=args.patience,
             save=True,
             save_period=10,  # Save checkpoint every 10 epochs
             exist_ok=True,  # Allow overwriting existing project
-            pretrained=args.pretrained,
+            pretrained=pretrained,
             optimizer='AdamW',  # Use AdamW optimizer
             verbose=True,
             seed=42,  # Reproducibility
@@ -200,7 +210,7 @@ Examples:
 
         # Copy best model with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        best_source = Path(args.project) / args.name / 'weights' / 'best.pt'
+        best_source = Path(project) / name / 'weights' / 'best.pt'
         
         if best_source.exists():
             best_dest = models_dir / f'{timestamp}_best.pt'
@@ -218,7 +228,7 @@ Examples:
         # Log metrics
         logger.info("")
         logger.info("Training Metrics:")
-        logger.info(f"  Results saved to: {Path(args.project) / args.name}")
+        logger.info(f"  Results saved to: {Path(project) / name}")
         
         if args.dry_run:
             logger.info("")
