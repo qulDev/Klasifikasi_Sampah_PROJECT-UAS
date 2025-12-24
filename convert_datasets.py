@@ -34,6 +34,7 @@ logger = setup_logger(__name__)
 # Default configuration
 DEFAULT_SRC = './datasets/raw'
 DEFAULT_DST = './datasets/processed/all'
+# Use TARGET_CLASSES from label_mapper (10 classes from garbage-classification-v2)
 DEFAULT_CLASSES = TARGET_CLASSES
 
 

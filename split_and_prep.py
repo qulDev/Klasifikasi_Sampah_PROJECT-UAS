@@ -27,7 +27,19 @@ logger = setup_logger(__name__)
 DEFAULT_SRC = './datasets/processed/all'
 DEFAULT_OUT = './datasets/processed'
 DEFAULT_SPLIT = (0.8, 0.1, 0.1)  # train, val, test
-DEFAULT_CLASSES = ['plastic', 'metal', 'glass', 'paper', 'cardboard', 'other']
+# 10 classes from garbage-classification-v2
+DEFAULT_CLASSES = [
+    'battery',     # 0: Batteries (hazardous waste)
+    'biological',  # 1: Organic/biological waste
+    'cardboard',   # 2: Cardboard boxes
+    'clothes',     # 3: Textile/clothing
+    'glass',       # 4: Glass bottles, jars
+    'metal',       # 5: Metal cans, foil
+    'paper',       # 6: Paper, newspapers
+    'plastic',     # 7: Plastic bottles, bags
+    'shoes',       # 8: Footwear
+    'trash',       # 9: General/mixed trash
+]
 
 
 def deduplicate_images(images_dir: Path, labels_dir: Path) -> Tuple[List[Path], int]:

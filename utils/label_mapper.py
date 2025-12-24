@@ -10,33 +10,57 @@ from typing import Dict, List, Tuple
 from rapidfuzz import fuzz, process
 
 
-# Target classes for waste classification
-TARGET_CLASSES = ["plastic", "metal", "glass", "paper", "cardboard", "other"]
+# Target classes for waste classification (10 classes from garbage-classification-v2)
+TARGET_CLASSES = [
+    "battery",     # 0: Batteries (hazardous waste)
+    "biological",  # 1: Organic/biological waste (food scraps, etc.)
+    "cardboard",   # 2: Cardboard boxes, packaging
+    "clothes",     # 3: Textile/clothing waste
+    "glass",       # 4: Glass bottles, jars
+    "metal",       # 5: Metal cans, foil
+    "paper",       # 6: Paper, newspapers, magazines
+    "plastic",     # 7: Plastic bottles, bags, wrappers
+    "shoes",       # 8: Footwear
+    "trash",       # 9: General/mixed trash
+]
 
 # Material keywords for intelligent mapping
 MATERIAL_KEYWORDS = {
-    "plastic": ["plastic", "pet", "hdpe", "pvc", "ldpe", "pp", "ps", "bottle", "wrapper", "bag"],
-    "metal": ["metal", "aluminum", "steel", "can", "tin", "foil", "aluminium"],
-    "glass": ["glass", "jar", "bottle"],
-    "paper": ["paper", "newspaper", "magazine", "book", "cardboard", "carton"],
-    "cardboard": ["cardboard", "carton", "box", "packaging"],
+    "battery": ["battery", "batteries", "cell", "lithium", "alkaline", "rechargeable"],
+    "biological": ["biological", "organic", "food", "compost", "vegetable", "fruit", "leaves", "garden"],
+    "cardboard": ["cardboard", "carton", "box", "packaging", "corrugated"],
+    "clothes": ["clothes", "clothing", "textile", "fabric", "shirt", "pants", "dress", "garment"],
+    "glass": ["glass", "jar", "bottle", "window", "mirror"],
+    "metal": ["metal", "aluminum", "aluminium", "steel", "can", "tin", "foil", "iron"],
+    "paper": ["paper", "newspaper", "magazine", "book", "document", "receipt"],
+    "plastic": ["plastic", "pet", "hdpe", "pvc", "ldpe", "pp", "ps", "bottle", "wrapper", "bag", "container"],
+    "shoes": ["shoes", "shoe", "footwear", "sneaker", "boot", "sandal", "slipper"],
+    "trash": ["trash", "garbage", "waste", "rubbish", "mixed", "general"],
 }
 
 # Manual class mappings for specific datasets
-# Maps source class names to target classes
+# Maps source class names to target classes (direct mapping for all 10 classes)
 MANUAL_CLASS_MAPPINGS = {
-    # garbage-classification-v2 additional classes -> other
-    "battery": "other",
-    "biological": "other", 
-    "clothes": "other",
-    "shoes": "other",
-    "trash": "other",
-    # Standard mappings (explicit)
-    "plastic": "plastic",
-    "metal": "metal",
-    "glass": "glass",
-    "paper": "paper",
+    # Direct mappings for garbage-classification-v2 (all 10 classes)
+    "battery": "battery",
+    "biological": "biological",
     "cardboard": "cardboard",
+    "clothes": "clothes",
+    "glass": "glass",
+    "metal": "metal",
+    "paper": "paper",
+    "plastic": "plastic",
+    "shoes": "shoes",
+    "trash": "trash",
+    # Alternative names/aliases
+    "organic": "biological",
+    "food": "biological",
+    "textile": "clothes",
+    "fabric": "clothes",
+    "footwear": "shoes",
+    "garbage": "trash",
+    "waste": "trash",
+    "other": "trash",  # Map old 'other' to 'trash'
 }
 
 
@@ -240,5 +264,5 @@ def map_label(
     if target:
         return target, method, conf
 
-    # 6. Fallback to "other"
-    return "other", "fallback", 0.50
+    # 6. Fallback to "trash" (general/mixed waste)
+    return "trash", "fallback", 0.50

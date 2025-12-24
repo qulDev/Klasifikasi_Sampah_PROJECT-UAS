@@ -208,22 +208,17 @@ Training Parameters Explained:
         models_dir = Path('./models')
         models_dir.mkdir(exist_ok=True)
 
-        # Copy best model with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Copy best model with simple name
         best_source = Path(project) / name / 'weights' / 'best.pt'
         
         if best_source.exists():
-            best_dest = models_dir / f'{timestamp}_best.pt'
+            best_dest = models_dir / 'best_model.pt'
             import shutil
+            # Remove old model if exists
+            if best_dest.exists():
+                best_dest.unlink()
             shutil.copy2(best_source, best_dest)
             logger.info(f"Best model saved to: {best_dest}")
-
-            # Create symlink to latest best model
-            best_symlink = models_dir / 'best.pt'
-            if best_symlink.exists() or best_symlink.is_symlink():
-                best_symlink.unlink()
-            best_symlink.symlink_to(best_dest.name)
-            logger.info(f"Symlink created: {best_symlink} -> {best_dest.name}")
 
         # Log metrics
         logger.info("")

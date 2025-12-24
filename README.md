@@ -161,9 +161,9 @@ python detect.py
 **Configuration** (edit top of `detect.py`):
 
 ```python
-MODEL = './models/best.pt'  # Model path
-CONF = 0.25                 # Confidence threshold
-CAM = 0                     # Camera ID (0=default, 1=external)
+MODEL = './models/best_model.pt'  # Model path
+CONF = 0.25                       # Confidence threshold
+CAM = 0                           # Camera ID (0=default, 1=external)
 ```
 
 #### Interactive Notebook
@@ -209,21 +209,22 @@ jupyter notebook notebooks/scan_image.ipynb
 - ~~Cell 4-10~~: Merged into Cell 2
 
 See [QUICKSTART_REFACTORED.md](QUICKSTART_REFACTORED.md) for complete refactoring details.
-python detect_webcam.py --weights ./models/best.pt --source 0
+python detect.py
 
 ````
 
 Controls:
 - `q` - Quit
 - `s` - Save screenshot
-- `p` - Pause/Resume
+- `c` - Toggle confidence
 
 #### Static Image Detection
 
 Detect objects in a single image:
 
 ```bash
-python detect_webcam.py --weights ./models/best.pt --source ./test_image.jpg
+# Use the simplified detect.py or YOLO CLI
+yolo detect predict model=./models/best_model.pt source=./test_image.jpg
 ````
 
 #### Jupyter Notebook
@@ -264,14 +265,20 @@ datasets/
 
 ## 🎓 Target Classes
 
-The pipeline standardizes all labels to 6 waste categories:
+The pipeline standardizes all labels to **10 waste categories** (from garbage-classification-v2):
 
-1. **plastic** - Plastic bottles, bags, wrappers, PET, HDPE, etc.
-2. **metal** - Aluminum cans, steel, tin, foil
-3. **glass** - Glass bottles, jars
-4. **paper** - Paper, newspaper, magazines, documents
-5. **cardboard** - Cardboard boxes, cartons, packaging
-6. **other** - Unknown or mixed waste items
+| ID  | Class          | Description                                      |
+| --- | -------------- | ------------------------------------------------ |
+| 0   | **battery**    | Batteries (hazardous waste)                      |
+| 1   | **biological** | Organic/biological waste (food scraps, etc.)     |
+| 2   | **cardboard**  | Cardboard boxes, cartons, packaging              |
+| 3   | **clothes**    | Textile/clothing waste                           |
+| 4   | **glass**      | Glass bottles, jars                              |
+| 5   | **metal**      | Aluminum cans, steel, tin, foil                  |
+| 6   | **paper**      | Paper, newspaper, magazines, documents           |
+| 7   | **plastic**    | Plastic bottles, bags, wrappers, PET, HDPE, etc. |
+| 8   | **shoes**      | Footwear                                         |
+| 9   | **trash**      | General/mixed waste items                        |
 
 Label mapping uses:
 
@@ -279,7 +286,7 @@ Label mapping uses:
 - Fuzzy matching (typo tolerance)
 - Substring matching (`"plastic_bottle"` → `"plastic"`)
 - Material keywords (`"aluminum_can"` → `"metal"`)
-- Fallback to `"other"` for unknown labels
+- Fallback to `"trash"` for unknown labels
 
 ## 📁 Project Structure
 
@@ -350,7 +357,7 @@ python train.py --model yolov8s --resume
 ### Save Detection Video
 
 ```bash
-python detect_webcam.py --weights ./models/best.pt --source video.mp4 --save-out output.avi
+yolo detect predict model=./models/best_model.pt source=video.mp4 save=True
 ```
 
 ## 🐛 Troubleshooting
@@ -379,20 +386,22 @@ python train.py --model yolov8s --batch 8  # Try 8 or 4
 
 ### Issue: Webcam Not Opening
 
-**Solution**: Check webcam index
+**Solution**: Check webcam index (edit CAM in detect.py)
 
-```bash
-# Try different indices
-python detect_webcam.py --weights ./models/best.pt --source 1
-python detect_webcam.py --weights ./models/best.pt --source 2
+```python
+# In detect.py, change CAM value
+CAM = 0  # Default webcam
+CAM = 1  # External webcam
+CAM = 2  # Another webcam
 ```
 
 ### Issue: No Objects Detected
 
-**Solution**: Lower confidence threshold
+**Solution**: Lower confidence threshold (edit CONF in detect.py)
 
-```bash
-python detect_webcam.py --weights ./models/best.pt --source image.jpg --conf 0.15
+```python
+# In detect.py, change CONF value
+CONF = 0.15  # Lower threshold = more detections
 ```
 
 ## 📊 Performance Benchmarks

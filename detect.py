@@ -12,12 +12,23 @@ from ultralytics import YOLO
 import torch
 
 # Config
-MODEL = './models/20251223_235651_best.pt'
+MODEL = './models/best_model.pt'
 CONF = 0.25
 CAM = 0
 
-COLORS = {'plastic': (0,255,255), 'metal': (255,0,0), 'glass': (0,255,0),
-          'paper': (255,255,0), 'cardboard': (0,165,255), 'other': (128,128,128)}
+# Colors for 10 classes (BGR format for OpenCV)
+COLORS = {
+    'battery': (0, 0, 255),       # Red - hazardous
+    'biological': (0, 128, 0),    # Dark Green - organic
+    'cardboard': (0, 165, 255),   # Orange
+    'clothes': (255, 0, 255),     # Magenta
+    'glass': (0, 255, 0),         # Green
+    'metal': (255, 0, 0),         # Blue
+    'paper': (255, 255, 0),       # Cyan
+    'plastic': (0, 255, 255),     # Yellow
+    'shoes': (128, 0, 128),       # Purple
+    'trash': (128, 128, 128),     # Gray
+}
 
 def load():
     if not Path(MODEL).exists():
