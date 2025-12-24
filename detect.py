@@ -12,7 +12,7 @@ from ultralytics import YOLO
 import torch
 
 # Config
-MODEL = './models/best.pt'
+MODEL = './models/20251223_235651_best.pt'
 CONF = 0.25
 CAM = 0
 

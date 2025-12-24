@@ -22,10 +22,11 @@ from utils.annotation_parsers import (
     parse_yolo_txt,
     parse_csv_annotations,
     create_class_folder_annotation,
+    BoundingBox,
 )
 from utils.dataset_stats import detect_dataset_format
 from utils.image_utils import verify_image
-from utils.label_mapper import TARGET_CLASSES
+from utils.label_mapper import TARGET_CLASSES, map_label, MANUAL_CLASS_MAPPINGS
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -178,27 +179,57 @@ def convert_yolo(dataset_path: Path, out_dir: Path, class_map: Dict, dry_run: bo
 
 
 def convert_class_folders(dataset_path: Path, out_dir: Path, class_map: Dict, dry_run: bool) -> Tuple[int, int]:
-    """Convert class folder structure to YOLO."""
+    """Convert class folder structure to YOLO with intelligent label mapping."""
     logger.info(f"Converting class folders: {dataset_path.name}")
     
     class_dirs = [d for d in dataset_path.iterdir() if d.is_dir()]
     
+    # Filter out non-class directories (like TRAIN, TEST, etc)
+    valid_class_dirs = []
+    for d in class_dirs:
+        if d.name.upper() in ['TRAIN', 'TEST', 'VAL', 'VALIDATION']:
+            # Recursively add subdirectories
+            valid_class_dirs.extend([sd for sd in d.iterdir() if sd.is_dir()])
+        else:
+            valid_class_dirs.append(d)
+    
     if dry_run:
-        total = sum(len(list(d.glob('*.jpg')) + list(d.glob('*.png'))) for d in class_dirs)
-        logger.info(f"[DRY RUN] {total} images from {len(class_dirs)} classes")
+        total = sum(len(list(d.glob('*.jpg')) + list(d.glob('*.png')) + list(d.glob('*.jpeg'))) for d in valid_class_dirs)
+        logger.info(f"[DRY RUN] {total} images from {len(valid_class_dirs)} classes")
         return total, total
     
     num_img, num_ann = 0, 0
-    for class_dir in tqdm(class_dirs, desc="Class folders"):
-        annotation = create_class_folder_annotation(class_dir.name, class_map)
-        if not annotation:
-            logger.warning(f"Unknown class: {class_dir.name}")
+    class_counts = {}
+    
+    for class_dir in tqdm(valid_class_dirs, desc="Class folders"):
+        # Use map_label to get target class
+        source_class = class_dir.name.lower()
+        target_class, method, confidence = map_label(source_class)
+        
+        if target_class not in class_map:
+            logger.warning(f"Mapped class '{target_class}' not in target classes, skipping: {class_dir.name}")
             continue
         
-        img_files = list(class_dir.glob('*.jpg')) + list(class_dir.glob('*.png'))
+        class_id = class_map[target_class]
+        
+        # Track class mapping
+        if source_class not in class_counts:
+            class_counts[source_class] = {"target": target_class, "method": method, "count": 0}
+        
+        # Create full-image bounding box
+        bbox = BoundingBox(x_center=0.5, y_center=0.5, width=1.0, height=1.0)
+        annotation = (class_id, bbox)
+        
+        img_files = list(class_dir.glob('*.jpg')) + list(class_dir.glob('*.png')) + list(class_dir.glob('*.jpeg'))
         for img_path in img_files:
             num_ann += copy_image_and_label(img_path, [annotation], out_dir)
             num_img += 1
+            class_counts[source_class]["count"] += 1
+    
+    # Log class mapping summary
+    logger.info("Class mapping summary:")
+    for src, info in sorted(class_counts.items()):
+        logger.info(f"  {src} -> {info['target']} ({info['method']}): {info['count']} images")
     
     logger.info(f"Converted {num_img} images, {num_ann} annotations")
     return num_img, num_ann

@@ -1,29 +1,39 @@
-# Deep Learning
-torch>=2.0.0
-torchvision>=0.15.0
+# ============================================
+# Klasifikasi Sampah - Requirements
+# ============================================
+# 
+# INSTALASI DENGAN CUDA:
+# 1. Install PyTorch dengan CUDA terlebih dahulu:
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+#    (cu124 = CUDA 12.4, compatible dengan CUDA 13.0 driver)
+#
+# 2. Install requirements lainnya:
+#    pip install -r requirements.txt
+# ============================================
+
+# Deep Learning (YOLOv8)
 ultralytics>=8.0.0
 
 # Image Processing
 opencv-python>=4.8.0
 Pillow>=10.0.0
-numpy>=1.24.0
 
 # Data Processing
+numpy>=1.24.0
 pandas>=2.0.0
 scikit-learn>=1.3.0
 
-# Label Matching
+# Label Matching (fuzzy string matching)
 rapidfuzz>=3.0.0
 
-# Progress & Logging
+# Utilities
 tqdm>=4.66.0
 pyyaml>=6.0.0
 
-# Jupyter Notebook
+# Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Jupyter Notebook (optional)
 jupyter>=1.0.0
 ipywidgets>=8.0.0
-matplotlib>=3.8.0
-
-# Testing
-pytest>=7.4.0
-pytest-cov>=4.1.0

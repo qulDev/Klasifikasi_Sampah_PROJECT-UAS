@@ -24,22 +24,26 @@ Deteksi dan klasifikasi sampah anorganik menggunakan deep learning dengan YOLOv8
 ### Setup
 
 1. **Clone repository**:
+
    ```bash
-   git clone https://github.com/yourusername/Klasifikasi_Sampah.git
+   git clone https://github.com/qulDev/Klasifikasi_Sampah.git
    cd Klasifikasi_Sampah
    ```
 
 2. **Run setup script**:
+
    ```bash
    bash setup.sh
    ```
 
    This will:
+
    - Create virtual environment (`.venv/`)
    - Install all dependencies
    - Create project directory structure
 
 3. **Activate environment**:
+
    ```bash
    source .venv/bin/activate
    ```
@@ -92,6 +96,7 @@ python convert_datasets.py --dry-run
 ```
 
 **Supported formats**:
+
 - COCO JSON (Microsoft COCO)
 - Pascal VOC XML
 - YOLO TXT (existing YOLO datasets)
@@ -114,6 +119,7 @@ python split_and_prep.py --src ./data --out ./splits
 ```
 
 This generates:
+
 - `datasets/processed/train/` - Training set (80%)
 - `datasets/processed/val/` - Validation set (10%)
 - `datasets/processed/test/` - Test set (10%)
@@ -135,6 +141,7 @@ python train.py --model yolov8m --epochs 100 --batch 16
 ```
 
 **Model variants**:
+
 - `yolov8n`: Nano (fastest, lowest accuracy)
 - `yolov8s`: Small (recommended for most use cases)
 - `yolov8m`: Medium (good balance)
@@ -152,6 +159,7 @@ python detect.py
 **Controls**: `Q`=Quit | `S`=Save frame | `C`=Toggle confidence
 
 **Configuration** (edit top of `detect.py`):
+
 ```python
 MODEL = './models/best.pt'  # Model path
 CONF = 0.25                 # Confidence threshold
@@ -175,11 +183,13 @@ jupyter notebook notebooks/scan_image.ipynb
 ### ✨ What's New
 
 **1. Simplified Commands**
+
 - All scripts now use smart defaults
 - No required arguments for basic usage
 - Example: `python convert_datasets.py` (was: `python convert_datasets.py --src X --dst Y`)
 
 **2. Reduced Complexity**
+
 - `detect.py`: **130 lines** (was 358 in `realtime_detect.py`)
 - `scan_image.ipynb`: **4 cells** (was 10 cells)
 - Same features, cleaner code
@@ -192,6 +202,7 @@ jupyter notebook notebooks/scan_image.ipynb
 | Detect | `python realtime_detect.py` (358 lines) | `python detect.py` (130 lines) |
 
 **4. Streamlined Notebook**
+
 - **Cell 1**: Load model + dependencies
 - **Cell 2**: Upload widget + auto-detection
 - **Cell 3**: Help documentation
@@ -199,7 +210,8 @@ jupyter notebook notebooks/scan_image.ipynb
 
 See [QUICKSTART_REFACTORED.md](QUICKSTART_REFACTORED.md) for complete refactoring details.
 python detect_webcam.py --weights ./models/best.pt --source 0
-```
+
+````
 
 Controls:
 - `q` - Quit
@@ -212,7 +224,7 @@ Detect objects in a single image:
 
 ```bash
 python detect_webcam.py --weights ./models/best.pt --source ./test_image.jpg
-```
+````
 
 #### Jupyter Notebook
 
@@ -262,6 +274,7 @@ The pipeline standardizes all labels to 6 waste categories:
 6. **other** - Unknown or mixed waste items
 
 Label mapping uses:
+
 - Exact matching (case-insensitive)
 - Fuzzy matching (typo tolerance)
 - Substring matching (`"plastic_bottle"` → `"plastic"`)
@@ -353,11 +366,13 @@ python train.py --model yolov8s --batch 8  # Try 8 or 4
 ### Issue: Low mAP (Mean Average Precision)
 
 **Possible causes**:
+
 - Insufficient training epochs (try 100-300)
 - Poor quality annotations
 - Class imbalance (check with `--verbose`)
 
 **Solutions**:
+
 - Train longer: `--epochs 300`
 - Use larger model: `--model yolov8m`
 - Enable early stopping: `--patience 50`
@@ -383,15 +398,18 @@ python detect_webcam.py --weights ./models/best.pt --source image.jpg --conf 0.1
 ## 📊 Performance Benchmarks
 
 **Training** (YOLOv8s, 100 epochs, RTX 3060):
+
 - Dataset: 10K images
 - Training time: ~2 hours
 - mAP@0.5: 0.65-0.75 (expected)
 
 **Inference** (YOLOv8s, RTX 3060):
+
 - Webcam: 30-60 FPS
 - Static image: 15-20 ms
 
 **Inference** (YOLOv8s, CPU):
+
 - Webcam: 3-5 FPS
 - Static image: 200-300 ms
 

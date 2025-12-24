@@ -22,6 +22,23 @@ MATERIAL_KEYWORDS = {
     "cardboard": ["cardboard", "carton", "box", "packaging"],
 }
 
+# Manual class mappings for specific datasets
+# Maps source class names to target classes
+MANUAL_CLASS_MAPPINGS = {
+    # garbage-classification-v2 additional classes -> other
+    "battery": "other",
+    "biological": "other", 
+    "clothes": "other",
+    "shoes": "other",
+    "trash": "other",
+    # Standard mappings (explicit)
+    "plastic": "plastic",
+    "metal": "metal",
+    "glass": "glass",
+    "paper": "paper",
+    "cardboard": "cardboard",
+}
+
 
 def normalize_label(label: str) -> str:
     """
@@ -195,9 +212,13 @@ def map_label(
 
     normalized = normalize_label(source_label)
 
-    # 1. Manual override
+    # 1. Manual override - check both provided mappings and default MANUAL_CLASS_MAPPINGS
     if manual_mappings and normalized in manual_mappings:
         return manual_mappings[normalized], "manual", 1.0
+    
+    # Check default manual mappings
+    if normalized in MANUAL_CLASS_MAPPINGS:
+        return MANUAL_CLASS_MAPPINGS[normalized], "manual", 1.0
 
     # 2. Exact match
     target, method, conf = map_label_exact(source_label, target_classes)

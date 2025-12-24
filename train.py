@@ -87,19 +87,19 @@ Training Parameters Explained:
     # Simple arguments with smart defaults
     parser.add_argument('--model', type=str, default='yolov8s',
                         choices=['yolov8n', 'yolov8s', 'yolov8m', 'yolov8l', 'yolov8x'],
-                        help='Model size (default: yolov8s - balanced)')
+                        help='Model size (default: yolov8m - balanced)')
     parser.add_argument('--data', type=str, default='./data.yaml',
                         help='Data config file (default: ./data.yaml)')
     parser.add_argument('--epochs', type=int, default=100,
                         help='Training epochs (default: 100)')
-    parser.add_argument('--batch', type=int, default=16,
-                        help='Batch size (default: 16)')
+    parser.add_argument('--batch', type=int, default=20,
+                        help='Batch size (default: 20)')
     parser.add_argument('--imgsz', type=int, default=640,
                         help='Image size (default: 640)')
     parser.add_argument('--device', type=str, default='auto',
                         help='Device: auto/cpu/cuda (default: auto)')
-    parser.add_argument('--patience', type=int, default=50,
-                        help='Early stopping patience (default: 50)')
+    parser.add_argument('--patience', type=int, default=10,
+                        help='Early stopping patience - stop if no improvement (default: 10)')
     parser.add_argument('--resume', action='store_true',
                         help='Resume from checkpoint')
     parser.add_argument('--dry-run', action='store_true',
