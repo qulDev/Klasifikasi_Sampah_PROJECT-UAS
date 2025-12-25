@@ -1,460 +1,357 @@
-# Klasifikasi Sampah - Automated Waste Detection Pipeline
+# ♻️ Klasifikasi Sampah Anorganik Menggunakan Algoritma YOLO
 
-> Automated pipeline for waste classification using YOLOv8 object detection
+> Sistem deteksi dan klasifikasi sampah anorganik menggunakan algoritma YOLO (You Only Look Once)
 
-Deteksi dan klasifikasi sampah anorganik menggunakan deep learning dengan YOLOv8. Pipeline ini secara otomatis mengonversi berbagai format dataset, melatih model deteksi objek, dan menyediakan antarmuka untuk inferensi real-time.
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-green.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-Web_App-red.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-REST_API-teal.svg)
 
-## 🎯 Features
+Project ini mengimplementasikan sistem deteksi dan klasifikasi **10 jenis sampah** secara otomatis menggunakan deep learning dengan algoritma **YOLO (You Only Look Once)**. Dilengkapi dengan Web App (Streamlit), REST API (FastAPI), dan Real-time Detection.
 
-- **Multi-Format Dataset Conversion**: Automatically detect and convert COCO JSON, Pascal VOC XML, YOLO TXT, class folders, and CSV annotations to unified YOLO format
-- **Intelligent Label Mapping**: Fuzzy string matching and keyword-based mapping to standardize heterogeneous class names
-- **Automated Data Preparation**: Deduplication via content hashing, stratified train/val/test splits
-- **YOLOv8 Training**: GPU-accelerated training with pretrained weights and early stopping
-- **Real-time Webcam Detection**: Live object detection on webcam or video files
-- **Interactive Notebook**: Jupyter interface for image upload and detection visualization
+---
 
-## 📦 Installation
+## 🎯 Fitur Utama
+
+| Fitur                      | Deskripsi                                 |
+| -------------------------- | ----------------------------------------- |
+| 🌐 **Web App**             | Interface web interaktif dengan Streamlit |
+| 🔌 **REST API**            | API endpoint untuk integrasi sistem lain  |
+| 📹 **Real-time Detection** | Deteksi langsung dari webcam              |
+| 📓 **Jupyter Notebook**    | Interface interaktif untuk eksperimen     |
+| 🔄 **Auto Pipeline**       | Konversi dataset otomatis ke format YOLO  |
+| 🎯 **10 Kelas**            | Klasifikasi lengkap berbagai jenis sampah |
+
+---
+
+## 🗑️ 10 Kelas Sampah
+
+| ID  | Kelas          | Emoji | Kategori       | Tempat Sampah |
+| --- | -------------- | ----- | -------------- | ------------- |
+| 0   | **battery**    | 🔋    | B3 (Berbahaya) | 🔴 Merah      |
+| 1   | **biological** | 🥬    | Organik        | 🟢 Hijau      |
+| 2   | **cardboard**  | 📦    | Anorganik      | 🔵 Biru       |
+| 3   | **clothes**    | 👕    | Tekstil        | 🔵 Biru       |
+| 4   | **glass**      | 🍾    | Anorganik      | 🔵 Biru       |
+| 5   | **metal**      | 🥫    | Anorganik      | 🔵 Biru       |
+| 6   | **paper**      | 📄    | Anorganik      | 🔵 Biru       |
+| 7   | **plastic**    | 🥤    | Anorganik      | 🟡 Kuning     |
+| 8   | **shoes**      | 👟    | Tekstil        | 🔵 Biru       |
+| 9   | **trash**      | 🗑️    | Residu         | ⚫ Hitam      |
+
+---
+
+## 📦 Instalasi
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- CUDA 11.0+ (optional, for GPU acceleration)
-- 8GB+ RAM (16GB+ recommended for training)
+- Python 3.8+
+- CUDA 11.0+ (opsional, untuk GPU)
+- 8GB+ RAM
 
 ### Setup
 
-1. **Clone repository**:
+```bash
+# 1. Clone repository
+git clone https://github.com/yourusername/Klasifikasi_Sampah.git
+cd Klasifikasi_Sampah
 
-   ```bash
-   git clone https://github.com/qulDev/Klasifikasi_Sampah.git
-   cd Klasifikasi_Sampah
-   ```
+# 2. Buat virtual environment
+python -m venv .venv
 
-2. **Run setup script**:
+# 3. Aktivasi environment
+# Windows:
+.\.venv\Scripts\Activate.ps1
+# Linux/Mac:
+source .venv/bin/activate
 
-   ```bash
-   bash setup.sh
-   ```
+# 4. Install dependencies
+pip install -r requirements.txt
 
-   This will:
+# 5. Verifikasi instalasi
+python -c "import torch; import ultralytics; print('✓ Ready!')"
+```
 
-   - Create virtual environment (`.venv/`)
-   - Install all dependencies
-   - Create project directory structure
-
-3. **Activate environment**:
-
-   ```bash
-   source .venv/bin/activate
-   ```
-
-4. **Verify installation**:
-   ```bash
-   python -c "import torch; import ultralytics; print('✓ All dependencies loaded')"
-   ```
+---
 
 ## 🚀 Quick Start
 
-### Simple Usage (Recommended)
+### Opsi 1: Web App (Recommended) 🌐
 
 ```bash
-# 1. Setup
-bash setup.sh && source .venv/bin/activate
-
-# 2. Convert datasets (auto-detect format)
-python convert_datasets.py
-
-# 3. Split train/val/test
-python split_and_prep.py
-
-# 4. Train model
-python train.py
-
-# 5. Detect objects (webcam)
-python detect.py
+streamlit run web_app.py
 ```
 
-**That's it!** All commands use smart defaults. See [QUICKSTART_REFACTORED.md](QUICKSTART_REFACTORED.md) for details.
+Buka http://localhost:8501 di browser.
+
+**Fitur:**
+
+- Upload gambar atau gunakan kamera
+- Visualisasi hasil deteksi
+- Info lengkap per objek (kategori, cara buang, tips)
+- Summary recyclable vs non-recyclable
 
 ---
 
-### Advanced Usage
-
-#### 1. Convert Datasets
-
-Convert raw datasets to YOLO format:
+### Opsi 2: REST API 🔌
 
 ```bash
-# Use defaults (src=./datasets/raw, dst=./datasets/processed/all)
-python convert_datasets.py
-
-# Custom paths
-python convert_datasets.py --src ./my_data --dst ./output
-
-# Preview only (dry-run)
-python convert_datasets.py --dry-run
+uvicorn api:app --reload --port 8000
 ```
 
-**Supported formats**:
+Buka http://localhost:8000/docs untuk interactive API docs.
 
-- COCO JSON (Microsoft COCO)
-- Pascal VOC XML
-- YOLO TXT (existing YOLO datasets)
-- Class folders (folder-per-class structure)
-- CSV annotations (custom bbox format)
+**Endpoints:**
 
-#### 2. Split Dataset
+| Method | Endpoint        | Deskripsi               |
+| ------ | --------------- | ----------------------- |
+| `GET`  | `/`             | Info API                |
+| `GET`  | `/health`       | Health check            |
+| `GET`  | `/classes`      | Daftar 10 kelas         |
+| `POST` | `/detect`       | Deteksi sampah (JSON)   |
+| `POST` | `/detect/image` | Deteksi (return gambar) |
 
-Create train/val/test splits with stratification:
+**Contoh Request:**
 
 ```bash
-# Use defaults (80/10/10 split)
-python split_and_prep.py
-
-# Custom split ratio
-python split_and_prep.py --split 0.7 0.15 0.15
-
-# Custom paths
-python split_and_prep.py --src ./data --out ./splits
+curl -X POST "http://localhost:8000/detect" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@gambar_sampah.jpg" \
+  -F "confidence=0.25"
 ```
 
-This generates:
+---
 
-- `datasets/processed/train/` - Training set (80%)
-- `datasets/processed/val/` - Validation set (10%)
-- `datasets/processed/test/` - Test set (10%)
-- `data.yaml` - YOLO configuration file
-
-#### 3. Train Model
-
-Train YOLOv8 object detection model:
-
-```bash
-# Basic training (uses defaults)
-python train.py
-
-# Quick test (1 epoch)
-python train.py --model yolov8n --epochs 1 --dry-run
-
-# Train medium model
-python train.py --model yolov8m --epochs 100 --batch 16
-```
-
-**Model variants**:
-
-- `yolov8n`: Nano (fastest, lowest accuracy)
-- `yolov8s`: Small (recommended for most use cases)
-- `yolov8m`: Medium (good balance)
-- `yolov8l`: Large (high accuracy, slower)
-- `yolov8x`: Extra Large (best accuracy, slowest)
-
-### 4. Run Inference
-
-#### Real-time Webcam Detection (Simplified)
+### Opsi 3: Real-time Webcam 📹
 
 ```bash
 python detect.py
 ```
 
-**Controls**: `Q`=Quit | `S`=Save frame | `C`=Toggle confidence
+**Kontrol:**
 
-**Configuration** (edit top of `detect.py`):
+- `Q` = Quit
+- `S` = Save screenshot
+- `C` = Toggle confidence
 
-```python
-MODEL = './models/best_model.pt'  # Model path
-CONF = 0.25                       # Confidence threshold
-CAM = 0                           # Camera ID (0=default, 1=external)
-```
+---
 
-#### Interactive Notebook
-
-Jupyter notebook for image upload and detection:
+### Opsi 4: Jupyter Notebook 📓
 
 ```bash
 jupyter notebook notebooks/scan_image.ipynb
 ```
 
-**Usage**: Run Cell 1 (load model) → Cell 2 (upload & detect) → Results appear automatically
+---
+
+## 🔧 Training Model
+
+### 1. Persiapan Dataset
+
+```bash
+# Convert dataset ke format YOLO
+python convert_datasets.py
+
+# Split train/val/test (80/10/10)
+python split_and_prep.py
+```
+
+### 2. Training
+
+```bash
+# Training standar (100 epoch)
+python train.py --epochs 100
+
+# Training cepat (test)
+python train.py --epochs 10 --dry-run
+
+# Model lebih besar (lebih akurat)
+python train.py --model yolov8m --epochs 100
+
+# Lanjutkan training (resume)
+python train.py --resume --epochs 50
+```
+
+### 3. Model Variants
+
+| Model     | Size  | Speed  | Accuracy   |
+| --------- | ----- | ------ | ---------- |
+| `yolov8n` | 3.2M  | ⚡⚡⚡ | ⭐         |
+| `yolov8s` | 11.2M | ⚡⚡   | ⭐⭐       |
+| `yolov8m` | 25.9M | ⚡     | ⭐⭐⭐     |
+| `yolov8l` | 43.7M | 🐢     | ⭐⭐⭐⭐   |
+| `yolov8x` | 68.2M | 🐢🐢   | ⭐⭐⭐⭐⭐ |
 
 ---
 
-## 📋 Refactored Features
-
-### ✨ What's New
-
-**1. Simplified Commands**
-
-- All scripts now use smart defaults
-- No required arguments for basic usage
-- Example: `python convert_datasets.py` (was: `python convert_datasets.py --src X --dst Y`)
-
-**2. Reduced Complexity**
-
-- `detect.py`: **130 lines** (was 358 in `realtime_detect.py`)
-- `scan_image.ipynb`: **4 cells** (was 10 cells)
-- Same features, cleaner code
-
-**3. Better Defaults**
-| Script | Old Command | New Command |
-|--------|------------|-------------|
-| Convert | `python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all` | `python convert_datasets.py` |
-| Split | `python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.8 0.1 0.1` | `python split_and_prep.py` |
-| Detect | `python realtime_detect.py` (358 lines) | `python detect.py` (130 lines) |
-
-**4. Streamlined Notebook**
-
-- **Cell 1**: Load model + dependencies
-- **Cell 2**: Upload widget + auto-detection
-- **Cell 3**: Help documentation
-- ~~Cell 4-10~~: Merged into Cell 2
-
-See [QUICKSTART_REFACTORED.md](QUICKSTART_REFACTORED.md) for complete refactoring details.
-python detect.py
-
-````
-
-Controls:
-- `q` - Quit
-- `s` - Save screenshot
-- `c` - Toggle confidence
-
-#### Static Image Detection
-
-Detect objects in a single image:
-
-```bash
-# Use the simplified detect.py or YOLO CLI
-yolo detect predict model=./models/best_model.pt source=./test_image.jpg
-````
-
-#### Jupyter Notebook
-
-Interactive image scanning:
-
-```bash
-jupyter notebook notebooks/scan_image.ipynb
-```
-
-## 📊 Dataset Structure
-
-```
-datasets/
-├── raw/                                  # Original datasets (never modified)
-│   ├── Garbage Classification (Kaggle)/
-│   ├── garbage-classification-v2/
-│   ├── TACO (Trash Annotations in Context)/
-│   ├── TrashNet (Stanford)/
-│   └── Waste Classification Data v2/
-│
-├── processed/                            # Converted datasets
-│   ├── all/                              # Merged dataset before split
-│   │   ├── images/
-│   │   └── labels/
-│   ├── train/                            # Training set (80%)
-│   │   ├── images/
-│   │   └── labels/
-│   ├── val/                              # Validation set (10%)
-│   │   ├── images/
-│   │   └── labels/
-│   └── test/                             # Test set (10%)
-│       ├── images/
-│       └── labels/
-│
-└── label_map.json                        # Label mapping documentation
-```
-
-## 🎓 Target Classes
-
-The pipeline standardizes all labels to **10 waste categories** (from garbage-classification-v2):
-
-| ID  | Class          | Description                                      |
-| --- | -------------- | ------------------------------------------------ |
-| 0   | **battery**    | Batteries (hazardous waste)                      |
-| 1   | **biological** | Organic/biological waste (food scraps, etc.)     |
-| 2   | **cardboard**  | Cardboard boxes, cartons, packaging              |
-| 3   | **clothes**    | Textile/clothing waste                           |
-| 4   | **glass**      | Glass bottles, jars                              |
-| 5   | **metal**      | Aluminum cans, steel, tin, foil                  |
-| 6   | **paper**      | Paper, newspaper, magazines, documents           |
-| 7   | **plastic**    | Plastic bottles, bags, wrappers, PET, HDPE, etc. |
-| 8   | **shoes**      | Footwear                                         |
-| 9   | **trash**      | General/mixed waste items                        |
-
-Label mapping uses:
-
-- Exact matching (case-insensitive)
-- Fuzzy matching (typo tolerance)
-- Substring matching (`"plastic_bottle"` → `"plastic"`)
-- Material keywords (`"aluminum_can"` → `"metal"`)
-- Fallback to `"trash"` for unknown labels
-
-## 📁 Project Structure
+## 📁 Struktur Project
 
 ```
 Klasifikasi_Sampah/
-├── convert_datasets.py        # Dataset conversion script
-├── split_and_prep.py          # Data splitting script
-├── train.py                   # YOLOv8 training script
-├── detect_webcam.py           # Real-time detection script
-├── setup.sh                   # Environment setup automation
-├── requirements.txt           # Python dependencies
-├── data.yaml                  # YOLO dataset configuration
+├── 🌐 web_app.py           # Streamlit Web App
+├── 🔌 api.py               # FastAPI REST API
+├── 📹 detect.py            # Real-time webcam detection
+├── 🔄 convert_datasets.py  # Dataset converter
+├── ✂️ split_and_prep.py    # Dataset splitter
+├── 🎯 train.py             # Model training
+├── 📋 data.yaml            # YOLO config
+├── 📦 requirements.txt     # Dependencies
 │
-├── utils/                     # Utility modules
-│   ├── __init__.py
-│   ├── logger.py              # Logging configuration
-│   ├── image_utils.py         # Image verification & hashing
-│   ├── label_mapper.py        # Label standardization
-│   ├── dataset_stats.py       # Statistics & format detection
-│   └── annotation_parsers.py  # Multi-format parsers
+├── models/
+│   └── best_model.pt       # Trained model
 │
-├── notebooks/                 # Interactive analysis
-│   └── scan_image.ipynb       # Image upload & detection UI
+├── datasets/
+│   ├── raw/                # Dataset mentah
+│   │   └── garbage-classification-v2/
+│   │       ├── battery/
+│   │       ├── biological/
+│   │       ├── cardboard/
+│   │       ├── clothes/
+│   │       ├── glass/
+│   │       ├── metal/
+│   │       ├── paper/
+│   │       ├── plastic/
+│   │       ├── shoes/
+│   │       └── trash/
+│   └── processed/          # Dataset siap training
+│       ├── train/
+│       ├── val/
+│       └── test/
 │
-├── models/                    # Trained model weights
-│   └── best.pt                # Latest best model
+├── notebooks/
+│   └── scan_image.ipynb    # Jupyter notebook
 │
-└── runs/                      # Training logs & metrics
+├── utils/
+│   ├── annotation_parsers.py
+│   ├── dataset_stats.py
+│   ├── image_utils.py
+│   ├── label_mapper.py
+│   └── logger.py
+│
+└── runs/
     └── detect/
-        └── train*/
+        └── train/          # Training results
 ```
-
-## 🔧 Advanced Usage
-
-### Custom Label Mapping
-
-Create `datasets/label_map.json` with manual mappings:
-
-```json
-{
-  "manual_mappings": {
-    "pet_bottle": "plastic",
-    "aluminum_foil": "metal",
-    "glass_jar": "glass"
-  }
-}
-```
-
-Then run conversion:
-
-```bash
-python convert_datasets.py --src ./datasets/raw --dst ./datasets/processed/all --mapping-file datasets/label_map.json
-```
-
-### Custom Split Ratios
-
-```bash
-# 70% train, 15% val, 15% test
-python split_and_prep.py --src ./datasets/processed/all --out ./datasets/processed --split 0.7 0.15 0.15
-```
-
-### Resume Training
-
-```bash
-python train.py --model yolov8s --resume
-```
-
-### Save Detection Video
-
-```bash
-yolo detect predict model=./models/best_model.pt source=video.mp4 save=True
-```
-
-## 🐛 Troubleshooting
-
-### Issue: CUDA Out of Memory
-
-**Solution**: Reduce batch size
-
-```bash
-python train.py --model yolov8s --batch 8  # Try 8 or 4
-```
-
-### Issue: Low mAP (Mean Average Precision)
-
-**Possible causes**:
-
-- Insufficient training epochs (try 100-300)
-- Poor quality annotations
-- Class imbalance (check with `--verbose`)
-
-**Solutions**:
-
-- Train longer: `--epochs 300`
-- Use larger model: `--model yolov8m`
-- Enable early stopping: `--patience 50`
-
-### Issue: Webcam Not Opening
-
-**Solution**: Check webcam index (edit CAM in detect.py)
-
-```python
-# In detect.py, change CAM value
-CAM = 0  # Default webcam
-CAM = 1  # External webcam
-CAM = 2  # Another webcam
-```
-
-### Issue: No Objects Detected
-
-**Solution**: Lower confidence threshold (edit CONF in detect.py)
-
-```python
-# In detect.py, change CONF value
-CONF = 0.15  # Lower threshold = more detections
-```
-
-## 📊 Performance Benchmarks
-
-**Training** (YOLOv8s, 100 epochs, RTX 3060):
-
-- Dataset: 10K images
-- Training time: ~2 hours
-- mAP@0.5: 0.65-0.75 (expected)
-
-**Inference** (YOLOv8s, RTX 3060):
-
-- Webcam: 30-60 FPS
-- Static image: 15-20 ms
-
-**Inference** (YOLOv8s, CPU):
-
-- Webcam: 3-5 FPS
-- Static image: 200-300 ms
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- **Ultralytics**: YOLOv8 framework
-- **TACO Dataset**: Trash Annotations in Context
-- **TrashNet**: Stanford waste classification dataset
-- **Kaggle**: Various waste classification datasets
-
-## 📞 Support
-
-For questions or issues:
-
-1. Check [Troubleshooting](#-troubleshooting) section
-2. Search existing issues
-3. Create a new issue with:
-   - Python version
-   - Operating system
-   - Error messages
-   - Steps to reproduce
 
 ---
 
-**Built with ❤️ for automated waste detection**
+## 🛠️ Konfigurasi
+
+### Web App (`web_app.py`)
+
+```python
+MODEL_PATH = './models/best_model.pt'
+DEFAULT_CONF = 0.25
+```
+
+### API (`api.py`)
+
+```python
+MODEL_PATH = './models/best_model.pt'
+DEFAULT_CONF = 0.25
+```
+
+### Webcam Detection (`detect.py`)
+
+```python
+MODEL = './models/best_model.pt'
+CONF = 0.25
+CAM = 0  # Camera index
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Model tidak ditemukan
+
+```bash
+# Pastikan sudah training
+python train.py --epochs 100
+```
+
+### CUDA Out of Memory
+
+```bash
+# Kurangi batch size
+python train.py --batch 8
+```
+
+### Webcam tidak terbuka
+
+```python
+# Edit detect.py, ganti CAM
+CAM = 1  # Coba index lain
+```
+
+### Akurasi rendah
+
+```bash
+# Training lebih lama
+python train.py --epochs 200 --patience 30
+
+# Atau gunakan model lebih besar
+python train.py --model yolov8m
+```
+
+---
+
+## 📊 Output Files
+
+Setelah training, file tersimpan di:
+
+| File         | Lokasi                          | Deskripsi               |
+| ------------ | ------------------------------- | ----------------------- |
+| Best Model   | `models/best_model.pt`          | Model terbaik           |
+| Backup Model | `models/best_model_backup_*.pt` | Backup model sebelumnya |
+| Checkpoint   | `runs/detect/train/weights/`    | Training checkpoints    |
+| Metrics      | `runs/detect/train/results.csv` | Training metrics        |
+| Plots        | `runs/detect/train/*.png`       | Visualisasi training    |
+
+---
+
+## 📚 Teknologi yang Digunakan
+
+- **YOLOv8** - Algoritma deteksi objek real-time
+- **PyTorch** - Deep learning framework
+- **Ultralytics** - YOLOv8 implementation
+- **Streamlit** - Web application framework
+- **FastAPI** - REST API framework
+- **OpenCV** - Computer vision library
+
+---
+
+## 🤝 Contributing
+
+1. Fork repository
+2. Buat branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+---
+
+## 📄 License
+
+MIT License - Lihat [LICENSE](LICENSE) untuk detail.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics)
+- [Streamlit](https://streamlit.io/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- Dataset: [garbage-classification-v2](https://www.kaggle.com/datasets)
+
+---
+
+<div align="center">
+
+### ♻️ Klasifikasi Sampah Anorganik Menggunakan Algoritma YOLO
+
+**Bantu jaga lingkungan dengan membuang sampah pada tempatnya! 🌍**
+
+Made with ❤️ for a cleaner world
+
+</div>

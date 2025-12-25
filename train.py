@@ -193,6 +193,7 @@ Training Parameters Explained:
             save_period=10,  # Save checkpoint every 10 epochs
             exist_ok=True,  # Allow overwriting existing project
             pretrained=pretrained,
+            resume=args.resume,  # PENTING: Resume training dari checkpoint
             optimizer='AdamW',  # Use AdamW optimizer
             verbose=True,
             seed=42,  # Reproducibility
@@ -214,9 +215,16 @@ Training Parameters Explained:
         if best_source.exists():
             best_dest = models_dir / 'best_model.pt'
             import shutil
-            # Remove old model if exists
+            from datetime import datetime
+            
+            # Backup model lama jika ada (sebelum ditimpa)
             if best_dest.exists():
-                best_dest.unlink()
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_dest = models_dir / f'best_model_backup_{timestamp}.pt'
+                shutil.copy2(best_dest, backup_dest)
+                logger.info(f"Previous model backed up to: {backup_dest}")
+            
+            # Copy model baru
             shutil.copy2(best_source, best_dest)
             logger.info(f"Best model saved to: {best_dest}")
 
@@ -247,3 +255,4 @@ Training Parameters Explained:
 
 if __name__ == '__main__':
     exit(main())
+ 
