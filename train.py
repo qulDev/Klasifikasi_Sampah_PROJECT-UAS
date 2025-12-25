@@ -90,8 +90,8 @@ Training Parameters Explained:
                         help='Model size (default: yolov8m - balanced)')
     parser.add_argument('--data', type=str, default='./data.yaml',
                         help='Data config file (default: ./data.yaml)')
-    parser.add_argument('--epochs', type=int, default=100,
-                        help='Training epochs (default: 100)')
+    parser.add_argument('--epochs', type=int, default=120,
+                        help='Training epochs (default: 120)')
     parser.add_argument('--batch', type=int, default=20,
                         help='Batch size (default: 20)')
     parser.add_argument('--imgsz', type=int, default=640,
