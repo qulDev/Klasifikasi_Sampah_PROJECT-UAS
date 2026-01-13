@@ -53,8 +53,8 @@ Project ini mengimplementasikan sistem deteksi dan klasifikasi **10 jenis sampah
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/yourusername/Klasifikasi_Sampah.git
-cd Klasifikasi_Sampah
+git clone https://github.com/qulDev/Klasifikasi_Sampah_PROJECT-UAS.git
+cd Klasifikasi_Sampah_PROJECT-UAS
 
 # 2. Buat virtual environment
 python -m venv .venv
